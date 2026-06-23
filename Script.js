@@ -17,22 +17,16 @@
   });
 
   function init() {
-
+    // ─── Variaveis ─────────────────────────────────────────────────
     if (!window.CONFIG) {
       console.error("CONFIG não carregado");
       return;
     }
-    
     const CONFIG = window.CONFIG;
-  
     const OPENROUTER_KEY = CONFIG.OPENROUTER_KEY;
     const MODEL = CONFIG.MODEL;
-  
-    const BOOK_TITLE = 'NOME DO LIVRO';
-  
-    const BOOK_CONTEXT = `
-Aqui vc coloca caracteristicas, enredo, genero, tema e etc do livro
-`;
+    const BOOK_TITLE = CONFIG.BOOK_TITLE;
+    const BOOK_CONTEXT = CONFIG.BOOK_CONTEXT;
 
     // ─── Auto-page ─────────────────────────────────────────────────
     let autoPageActive = false;
@@ -121,7 +115,7 @@ Aqui vc coloca caracteristicas, enredo, genero, tema e etc do livro
       document.body.appendChild(div);
     }
 
-    // ─── Lógica original intacta ───────────────────────────────────
+    // ─── Lógica  ───────────────────────────────────
     function getModal() {
       return document.querySelector('ngb-modal-window.quiz-modal') ||
              document.querySelector('[role="dialog"]');
