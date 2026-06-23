@@ -10,7 +10,7 @@ Este script automatiza interações na plataforma Elefante Letrado diretamente n
 
 Ele reduz ações manuais ao detectar atividades, extrair perguntas e gerar respostas automaticamente com auxílio de IA
 
-## As principais funções são:
+## Principais funções:
 
 - Navegação automática entre páginas quando não há interação necessária  
 - Detecção de quizzes e perguntas na interface  
@@ -22,7 +22,18 @@ Ele reduz ações manuais ao detectar atividades, extrair perguntas e gerar resp
 
 ## Instalação e Uso
 
-O script pode ser usado diretamente no navegador ou via extensão de userscript (como Tampermonkey).
+O script pode ser usado com Tampermonkey (recomendado).
+
+### 1. Instalar Tampermonkey
+- Chrome / Firefox / Edge: extensão oficial
+
+### 2. Adicionar o script
+- Criar novo userscript
+- Colar o conteúdo do `Script.js`
+- Salvar e ativar
+
+### 3. Acessar a plataforma
+- Abrir o Elefante Letrado normalmente
 
 ### Para usar manualmente:
   1. Abra o arquivo Script.js
@@ -30,18 +41,11 @@ O script pode ser usado diretamente no navegador ou via extensão de userscript 
   3. Crie um favorito e no campo URL cole o script
   4. Abra o elefante letrado e execute o favorito
 
-### Para usar Tampermonkey (Recomendado):
-  1. Instale a extensão Tampermonkey no navegador
-  2. Crie um novo script
-  3. Cole o conteúdo do Script.js
-  4. Salve e ative o script
-  5. Acesse a plataforma normalmente
-
 # Atenção❗
 
 O script depende de um campo de contexto onde o usuário informa o conteúdo base do livro ou atividade atual. Esse contexto é usado como referência para interpretar perguntas e gerar respostas mais coerentes.
 
-### 🔑 API utilizada
+## 🔑 API utilizada
 
 O projeto utiliza a API da [OpenRouter](https://openrouter.ai)
 
@@ -50,3 +54,9 @@ O projeto utiliza a API da [OpenRouter](https://openrouter.ai)
 * Criar uma conta no OpenRouter
 * Gerar uma API key em [OpenRouter Key](https://openrouter.ai/workspaces/default/keys)
 * Inserir no arquivo Config.js em `OPENROUTER_KEY`
+
+## Variaveis
+
+O script ultiliza o [Config.js](https://github.com/Dezin-fx/Elefante-Letrado-Automatico/blob/main/Config.js) para declarar o valor das variaveis usadas. Para usar o script é necessário alterar os valores de `BOOK_TITLE` e `BOOK_CONTEXT` 
+
+> `BOOK_CONTEXT` é do que se trata o livro, colocar genero, autor(a), etc. Recomendo fortemente ir no chatGPT ou na IA de sua preferencia e pedir um resumo completo do livro pra colocar aqui; pois assim a IA do script ganha mais contexto!  
