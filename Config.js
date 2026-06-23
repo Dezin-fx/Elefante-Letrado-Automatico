@@ -1,5 +1,5 @@
 window.CONFIG = {
-  OPENROUTER_KEY: "",
+  OPENROUTER_KEY: "vai ter que pegar uma api key em https://openrouter.ai/workspaces/default/keys",
   MODEL: "cohere/north-mini-code:free",
 
   BOOK_TITLE: "NOME DO LIVRO",
