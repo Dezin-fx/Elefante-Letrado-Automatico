@@ -1,4 +1,4 @@
-# 📘 Elefante-Letrado-Automatico
+# 📘 Elefante Letrado Automatico
 
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-browser-blue)
