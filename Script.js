@@ -5,6 +5,7 @@
 // @match        https://reader.elefanteletrado.com.br/*
 // @grant        GM_xmlhttpRequest
 // @connect      openrouter.ai
+// @require      https://raw.githubusercontent.com/user/repo/main/Config.js
 // ==/UserScript==
 
 const CONFIG = window.CONFIG;
