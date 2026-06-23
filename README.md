@@ -1,18 +1,24 @@
-# Elefante-Letrado-Automatico
+# 📘 Elefante-Letrado-Automatico
 
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-browser-blue)
 ![Type](https://img.shields.io/badge/type-userscript-yellow)
 
-Este script automatiza leitura e questões dentro da plataforma Elefante Letrado. 
-Ele é executado no navegador e manipula a interface para reduzir ações manuais durante o uso da plataforma.
+## 📌 Sobre o projeto
+
+Este script automatiza interações na plataforma Elefante Letrado diretamente no navegador.
+
+Ele reduz ações manuais ao detectar atividades, extrair perguntas e gerar respostas automaticamente com auxílio de IA
 
 ## As principais funções são:
 
-- Avançar automaticamente entre páginas ou etapas da atividade quando a página atual já foi processada ou não requer interação manual.
-- Identificar momentos em que há perguntas e tentar responder automaticamente com base em um contexto fornecido pelo usuário.
-- Utilizar um campo de contexto do livro (ou conteúdo atual) para orientar as respostas geradas, permitindo que o script tente manter coerência com o material exibido.
-- Interagir com elementos da interface como botões de continuar, avançar ou confirmar, simulando ações do usuário.
+- Navegação automática entre páginas quando não há interação necessária  
+- Detecção de quizzes e perguntas na interface  
+- Extração automática de perguntas e alternativas do DOM  
+- Geração de respostas utilizando IA (OpenRouter)  
+- Uso de contexto do livro para melhorar a precisão das respostas  
+- Interface de controle injetada na página  
+- Sistema de auto-paginação  
 
 ## Instalação e Uso
 
@@ -24,7 +30,7 @@ O script pode ser usado diretamente no navegador ou via extensão de userscript 
   3. Crie um favorito e no campo URL cole o script
   4. Abra o elefante letrado e execute o favorito
 
-### Para usar Tampermonkey(Recomendado):
+### Para usar Tampermonkey (Recomendado):
   1. Instale a extensão Tampermonkey no navegador
   2. Crie um novo script
   3. Cole o conteúdo do Script.js
@@ -43,4 +49,4 @@ O projeto utiliza a API da [OpenRouter](https://openrouter.ai)
 
 * Criar uma conta no OpenRouter
 * Gerar uma API key em [OpenRouter Key](https://openrouter.ai/workspaces/default/keys)
-* Inserir no arquivo Config.js
+* Inserir no arquivo Config.js em `OPENROUTER_KEY`
