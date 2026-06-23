@@ -7,6 +7,8 @@
 // @connect      openrouter.ai
 // ==/UserScript==
 
+import CONFIG from "./config.js";
+
 (function () {
   'use strict';
 
@@ -16,7 +18,7 @@
 
   function init() {
 
-    const OPENROUTER_KEY = 'vai ter que pegar uma api key em https://openrouter.ai/workspaces/default/keys';
+    const OPENROUTER_KEY = CONFIG.OPENROUTER_KEY;
     const MODEL = 'cohere/north-mini-code:free';
 
     const BOOK_TITLE = 'NOME DO LIVRO';
