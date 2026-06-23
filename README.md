@@ -16,6 +16,13 @@ Ele reduz ações manuais ao detectar atividades, extrair perguntas e gerar resp
 - Nenhum dado é enviado para terceiros além da API escolhida pelo usuário 
 - A chave da API é configurada localmente  
 
+## 🚀 Como usar
+
+1. Instale Tampermonkey  
+2. Adicione o script  
+3. Configure o arquivo `Config.js`  
+4. Acesse a plataforma  
+
 ## Principais funções:
 
 - Navegação automática entre páginas quando não há interação necessária  
