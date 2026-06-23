@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Elefante Assistente de Estudo (Preciso)
+// @name         Elefante Assistente de Estudo 
 // @namespace    http://tampermonkey.net/
 // @version      1.4
 // @match        https://reader.elefanteletrado.com.br/*
