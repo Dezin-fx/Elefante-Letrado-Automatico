@@ -5,28 +5,25 @@
 // @match        https://reader.elefanteletrado.com.br/*
 // @grant        GM_xmlhttpRequest
 // @connect      openrouter.ai
-// @connect      raw.githubusercontent.com
-// @require      https://raw.githubusercontent.com/Dezin-fx/Elefante-Letrado-Automatico/main/Config.js
+// @grant GM_getValue
+// @grant GM_setValue
 // ==/UserScript==
 
 (function () {
   'use strict';
 
+  const MODEL = "cohere/north-mini-code:free";
+  
   window.addEventListener('load', () => {
     setTimeout(init, 2000);
   });
 
   function init() {
     // ─── Variaveis ─────────────────────────────────────────────────
-    if (!window.CONFIG) {
-      console.error("CONFIG não carregado");
-      return;
-    }
-    const CONFIG = window.CONFIG;
-    const OPENROUTER_KEY = CONFIG.OPENROUTER_KEY;
-    const MODEL = CONFIG.MODEL;
-    const BOOK_TITLE = CONFIG.BOOK_TITLE;
-    const BOOK_CONTEXT = CONFIG.BOOK_CONTEXT;
+    const CONFIG = {
+      nomeLivro: GM_getValue("nomeLivro", ""),
+      apiKey: GM_getValue("apiKey", "")
+    };
 
     // ─── Auto-page ─────────────────────────────────────────────────
     let autoPageActive = false;
@@ -73,7 +70,27 @@
     const result = document.getElementById('ea-result');
     const btn = document.getElementById('ea-btn');
     const autoBtn = document.getElementById('ea-auto-btn');
-
+    document.getElementById("nomeLivro").value =
+      CONFIG.nomeLivro;
+    
+    document.getElementById("apiKey").value =
+      CONFIG.apiKey;
+    
+    document.getElementById("salvarConfig").onclick = () => {
+      GM_setValue(
+        "nomeLivro",
+        document.getElementById("nomeLivro").value.trim()
+      );
+    
+      GM_setValue(
+        "apiKey",
+        document.getElementById("apiKey").value.trim()
+      );
+    
+      alert("Configurações salvas.\nRecarregue a página.");
+    
+      location.reload();
+    };
     function setStatus(t, c = '#a6e3a1') {
       status.textContent = t;
       status.style.color = c;
@@ -84,33 +101,82 @@
 
       const div = document.createElement('div');
       div.innerHTML = `
-        <div id="ea-panel" style="
-          position:fixed; bottom:20px; right:20px; z-index:999999;
-          background:#1e1e2e; color:#cdd6f4; font-family:monospace;
-          border-radius:12px; padding:14px; box-shadow:0 4px 20px #0008;
-          width:380px;
-        ">
-          <b style="color:#cba6f7;">📘 ${BOOK_TITLE}</b>
-          <div id="ea-status" style="margin:8px 0;">Pronto</div>
-
-          <button id="ea-auto-btn" style="
-            width:100%; padding:8px; border:none; margin-bottom:6px;
-            border-radius:8px; background:#89b4fa;
-            font-weight:bold; cursor:pointer; color:#1e1e2e;
-          ">▶ Iniciar Auto-Página</button>
-
-          <button id="ea-btn" style="
-            width:100%; padding:8px; border:none;
-            border-radius:8px; background:#313244;
-            font-weight:bold; cursor:pointer; color:#cdd6f4;
-          ">🔍 Analisar Quiz Agora</button>
-
-          <div id="ea-result" style="
-            margin-top:10px; max-height:300px;
-            overflow:auto; font-size:12px;
-            white-space:pre-wrap;
-          "></div>
+      <div id="ea-panel" style="
+        position:fixed; bottom:20px; right:20px; z-index:999999;
+        background:#1e1e2e; color:#cdd6f4; font-family:monospace;
+        border-radius:12px; padding:14px; box-shadow:0 4px 20px #0008;
+        width:380px;
+      ">
+        <b style="color:#cba6f7;">
+        📘 ${CONFIG.nomeLivro || 'Livro não configurado'}
+        </b>
+      
+        <div class="config-section" style="margin-top:12px;">
+          <label for="nomeLivro">Nome do livro</label>
+          <input
+            id="nomeLivro"
+            type="text"
+            placeholder="Ex: O Pequeno Príncipe"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              margin:4px 0 10px 0;
+              padding:8px;
+              border:none;
+              border-radius:6px;
+            "
+          >
+      
+          <label for="apiKey">API Key</label>
+          <input
+            id="apiKey"
+            type="password"
+            placeholder="Cole sua API Key aqui"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              margin:4px 0 10px 0;
+              padding:8px;
+              border:none;
+              border-radius:6px;
+            "
+          >
+      
+          <button id="salvarConfig" style="
+            width:100%;
+            padding:8px;
+            border:none;
+            border-radius:8px;
+            margin-bottom:10px;
+            background:#a6e3a1;
+            color:#1e1e2e;
+            cursor:pointer;
+            font-weight:bold;
+          ">
+            Salvar configurações
+          </button>
         </div>
+      
+        <div id="ea-status" style="margin:8px 0;">Pronto</div>
+      
+        <button id="ea-auto-btn" style="
+          width:100%; padding:8px; border:none; margin-bottom:6px;
+          border-radius:8px; background:#89b4fa;
+          font-weight:bold; cursor:pointer; color:#1e1e2e;
+        ">▶ Iniciar Auto-Página</button>
+      
+        <button id="ea-btn" style="
+          width:100%; padding:8px; border:none;
+          border-radius:8px; background:#313244;
+          font-weight:bold; cursor:pointer; color:#cdd6f4;
+        ">🔍 Analisar Quiz Agora</button>
+      
+        <div id="ea-result" style="
+          margin-top:10px; max-height:300px;
+          overflow:auto; font-size:12px;
+          white-space:pre-wrap;
+        "></div>
+      </div>
       `;
       document.body.appendChild(div);
     }
@@ -175,12 +241,9 @@
     function perguntarIA(q) {
       return new Promise((resolve, reject) => {
         const prompt = `
-Você é especialista no livro "${BOOK_TITLE}".
+Você é especialista no livro "${CONFIG.nomeLivro}".
 
 Analise com extremo cuidado.
-
-Contexto:
-${BOOK_CONTEXT}
 
 Pergunta:
 ${q.pergunta}
@@ -209,7 +272,7 @@ Se não, escolha outra.
              method: 'POST',
              url: 'https://openrouter.ai/api/v1/chat/completions',
              headers: {
-                 Authorization: `Bearer ${OPENROUTER_KEY}`,
+                 Authorization: `Bearer ${CONFIG.apiKey}`,
                  'Content-Type': 'application/json'
              },
              data: JSON.stringify({
@@ -242,6 +305,15 @@ Se não, escolha outra.
 
     async function run() {
       // Para o auto-page enquanto analisa
+      async function run() {
+      if (!CONFIG.nomeLivro || !CONFIG.apiKey) {
+        setStatus('Configure o script', '#f38ba8');
+        result.textContent =
+          'Preencha o nome do livro e a API Key e clique em "Salvar configurações".';
+        return;
+      }
+
+  // resto do código...
       const eraAtivo = autoPageActive;
       if (eraAtivo) stopAutoPage();
 
