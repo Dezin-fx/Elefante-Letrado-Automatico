@@ -72,13 +72,13 @@
     function mostrarSetupLivro(apiKey) {
       renderPanel(`
         <b style="color:#cba6f7;font-size:16px;">📘 Nome do livro</b>
-        <p style="margin:14px 0 8px;font-size:13px;color:#a6adc8;">Qual livro você está lendo?</p>
+        <p style="margin:14px 0 8px;font-size:14px;color:#a6adc8;">Qual livro você está lendo?</p>
         <input id="ea-inp" type="text" placeholder="Ex: O Pequeno Príncipe"
           style="
-            width:100%;box-sizing:border-box;padding:10px 12px;
-            border:2px solid #6c5fc7;border-radius:8px;margin-bottom:6px;
-            background:#11111b;color:#cdd6f4;font-family:monospace;font-size:13px;
-            outline:none;
+            width:calc(100% - 4px);box-sizing:border-box;padding:10px 12px;
+            border:2px solid #6c5fc7;border-radius:8px;margin:0 0 6px 0;
+            background:#11111b;color:#cdd6f4;font-family:monospace;font-size:14px;
+            outline:none;display:block;transform:translateY(7px);
           ">
         <div id="ea-err" style="color:#f38ba8;font-size:12px;min-height:18px;margin-bottom:10px;"></div>
         <button id="ea-ok" style="
