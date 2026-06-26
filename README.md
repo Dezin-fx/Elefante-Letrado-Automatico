@@ -6,32 +6,28 @@
 
 ## 📌 Sobre o projeto
 
-Este script automatiza a leitura e resolução de questões na plataforma Elefante Letrado diretamente no navegador.
+O Elefante Letrado Automático é um Script para Tampermonkey que adiciona recursos de automação e assistência dentro da plataforma Elefante Letrado.
 
-Ele reduz ações manuais ao detectar atividades, extrair perguntas e gerar respostas automaticamente com auxílio de IA
+O Script fornece ferramentas para automatizar a navegação, detectar atividades e, opcionalmente, utilizar modelos de Inteligência Artificial para auxiliar na interpretação e resolução de quizzes.
 
 ## 🔒 É seguro?
 
 - O script roda apenas no seu navegador  
-- Nenhum dado é enviado para terceiros além da API escolhida pelo usuário 
-- A chave da API é configurada localmente  
-
-## 🚀 Como usar
-
-1. Instale Tampermonkey  
-2. Adicione o script  
-3. Configure o arquivo `Config.js`  
-4. Acesse a plataforma  
+- Nenhum dado é enviado para Servidores proprios
+- Quando a IA está ativada, apenas o conteúdo necessário para análise das perguntas é enviado diretamente para a API escolhida pelo usuário
+- A chave da API é armazenada localmente pelo Tampermonkey
 
 ## Principais funções:
 
-- Navegação automática entre páginas quando não há interação necessária  
-- Detecção de quizzes e perguntas na interface  
-- Extração automática de perguntas e alternativas
-- Geração de respostas utilizando IA 
-- Uso de contexto do livro para melhorar a precisão das respostas  
-- Interface de controle injetada na página  
-- Sistema de auto-paginação  
+- Navegação automática entre páginas.
+- Sistema de auto-paginação.
+- Detecção automática de quizzes.
+- Extração automática de perguntas e alternativas.
+- Integração opcional com IA através da OpenRouter.
+- Interface gráfica integrada à página.
+- Configuração inicial diretamente pela interface do script.
+- Detecção automática do título do livro.
+- Modo sem IA para utilização apenas dos recursos de automação.
 
 ## Instalação e Uso
 
@@ -41,9 +37,10 @@ O script pode ser usado com Tampermonkey (recomendado)
 - Chrome / Firefox / Edge: extensão oficial
 
 ### 2. Adicionar o script
-- Criar novo userscript
+- Abra o painel do Tampermonkey.
+- Criar novo Script
 - Colar o conteúdo do `Script.js`
-- Salvar e ativar
+- Salvar Script
 
 ### 3. Acessar a plataforma
 - Abrir o Elefante Letrado normalmente
