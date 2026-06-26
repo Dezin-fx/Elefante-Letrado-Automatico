@@ -23,10 +23,10 @@ O Script fornece ferramentas para automatizar a navegação, detectar atividades
 - Sistema de auto-paginação.
 - Detecção automática de quizzes.
 - Extração automática de perguntas e alternativas.
-- Integração opcional com IA através da OpenRouter.
+- Integração opcional com IA através do OpenRouter.
 - Interface gráfica integrada à página.
 - Configuração inicial diretamente pela interface do script.
-- Detecção automática do título do livro.
+- Detecção automática do livro.
 - Modo sem IA para utilização apenas dos recursos de automação.
 
 ## Instalação e Uso
