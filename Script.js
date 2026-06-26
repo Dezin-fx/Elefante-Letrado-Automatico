@@ -15,22 +15,43 @@
   const MODEL = 'cohere/north-mini-code:free';
 
   window.addEventListener('load', () => {
-    setTimeout(init, 2000);
+      let tentativas = 0;
+      function aguardar() {
+          const achou = document.querySelector('span.book-title');
+          if (achou || tentativas >= 20) {
+              init();
+          } else {
+              tentativas++;
+              setTimeout(aguardar, 500);
+          }
+      }
+      setTimeout(aguardar, 1000);
   });
 
   function init() {
-    const savedKey  = GM_getValue('apiKey', '');
-    const savedBook = GM_getValue('bookTitle', '');
-    const noAI      = GM_getValue('noAI', false);
+     const savedKey  = GM_getValue('apiKey', '');
+     const savedBook = GM_getValue('bookTitle', '');
+     const noAI      = GM_getValue('noAI', false);
 
-    // Já foi configurado antes → pula o setup
-    if (noAI || (savedKey && savedBook)) {
-      iniciarPrincipal(savedKey, savedBook);
-      return;
-    }
+     // Tenta pegar o nome do livro automaticamente da página
+     const nomeAutomatico = document.querySelector('span.book-title')?.title?.trim() || '';
 
-    // Primeira vez → começa pelo setup
-    mostrarSetupApiKey();
+     // Se achou o nome automaticamente, salva ele
+     if (nomeAutomatico) {
+         GM_setValue('bookTitle', nomeAutomatico);
+     }
+
+     // Nome final: automático > salvo manualmente > vazio
+     const bookTitle = nomeAutomatico || savedBook;
+
+     // Já foi configurado antes → pula o setup
+     if (noAI || (savedKey && bookTitle)) {
+         iniciarPrincipal(savedKey, noAI ? nomeAutomatico : bookTitle);
+         return;
+     }
+
+
+      mostrarSetupApiKey();
 
     // ─── Setup: Tela 1 — API Key ──────────────────────────────────
     function mostrarSetupApiKey() {
@@ -53,49 +74,18 @@
         ">Não quero usar IA</button>
       `);
       document.getElementById('ea-ok').onclick = () => {
-        const key = document.getElementById('ea-inp').value.trim();
-        if (!key) {
-          document.getElementById('ea-err').textContent = 'Insira uma API Key.';
-          return;
-        }
-        GM_setValue('apiKey', key);
-        mostrarSetupLivro(key);
+          const key = document.getElementById('ea-inp').value.trim();
+          if (!key) {
+              document.getElementById('ea-err').textContent = 'Insira uma API Key.';
+              return;
+          }
+          GM_setValue('apiKey', key);
+          iniciarPrincipal(key, nomeAutomatico);
       };
 
       document.getElementById('ea-noai').onclick = () => {
-        GM_setValue('noAI', true);
-        iniciarPrincipal('', '');
-      };
-    }
-
-    // ─── Setup: Tela 2 — Nome do livro ───────────────────────────
-    function mostrarSetupLivro(apiKey) {
-      renderPanel(`
-        <b style="color:#cba6f7;font-size:17px;">📘 Nome do livro</b>
-        <p style="margin:14px 0 8px;font-size:15px;color:#a6adc8;">Qual livro você está lendo?</p>
-        <input id="ea-inp" type="text" placeholder="Ex: O Pequeno Príncipe"
-          style="
-            width:calc(100% - 4px);box-sizing:border-box;padding:10px 12px;
-            border:2px solid #6c5fc7;border-radius:8px;margin:0 0 6px 0;
-            background:#11111b;color:#cdd6f4;font-family:monospace;font-size:14px;
-            outline:none;display:block;transform:translateY(7px);
-          ">
-        <div id="ea-err" style="color:#f38ba8;font-size:12px;min-height:18px;margin-bottom:10px;"></div>
-        <button id="ea-ok" style="
-          width:100%;padding:11px;border:none;border-radius:10px;
-          background:#a6e3a1;color:#1e1e2e;font-weight:bold;
-          font-size:14px;cursor:pointer;
-        ">Salvar e começar</button>
-      `);
-
-      document.getElementById('ea-ok').onclick = () => {
-        const livro = document.getElementById('ea-inp').value.trim();
-        if (!livro) {
-          document.getElementById('ea-err').textContent = 'Digite o nome do livro.';
-          return;
-        }
-        GM_setValue('bookTitle', livro);
-        iniciarPrincipal(apiKey, livro);
+          GM_setValue('noAI', true);
+          iniciarPrincipal('', nomeAutomatico);
       };
     }
 
@@ -350,6 +340,7 @@ Se não, escolha outra.
       if (btn) btn.onclick = run;
 
       resetBtn.onclick = () => {
+        stopAutoPage();
         GM_setValue('apiKey', '');
         GM_setValue('bookTitle', '');
         GM_setValue('noAI', false);
