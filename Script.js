@@ -118,16 +118,7 @@
         border-radius:10px;background:#89b4fa;
         font-weight:bold;font-size:14px;cursor:pointer;color:#1e1e2e;
         transform:translateY(5px);
-      ">▶ Iniciar Auto-Página</button>
-
-      ${apiKey ? `
-      <button id="ea-btn" style="
-        width:100%;padding:15px;border:none;margin-bottom:8px;
-        border-radius:10px;background:#313244;
-        font-weight:bold;font-size:14px;cursor:pointer;color:#cdd6f4;
-        transform:translateY(11px);
-      ">🔍 Analisar Quiz Agora</button>
-      ` : ''}
+      ">${apiKey ? '▶ Iniciar' : '▶ Iniciar Auto-Página'}</button>
 
       <div id="ea-result" style="
         margin-top:8px;max-height:300px;
@@ -145,7 +136,6 @@
     const statusEl = document.getElementById('ea-status');
     const resultEl = document.getElementById('ea-result');
     const autoBtn  = document.getElementById('ea-auto-btn');
-    const btn      = document.getElementById('ea-btn');
     const resetBtn = document.getElementById('ea-reset-btn');
 
     function setStatus(t, c = '#a6e3a1') {
@@ -284,7 +274,13 @@ Depois, verifique: "A resposta realmente responde a pergunta?"
 Se não, escolha outra.`;
         }
 
-        GM_xmlhttpRequest({
+        let timeoutId;
+        const timeoutPromise = new Promise((_, rej) => {
+          timeoutId = setTimeout(() => rej(new Error('Tempo limite excedido (30s)')), 30000);
+        });
+
+        const requestPromise = new Promise((res, rej) => {
+          GM_xmlhttpRequest({
           method: 'POST',
           url: 'https://openrouter.ai/api/v1/chat/completions',
           headers: {
@@ -302,17 +298,30 @@ Se não, escolha outra.`;
             ],
             temperature: 0
           }),
-          onload: res => {
+          onload: r => {
             try {
-              const data = JSON.parse(res.responseText);
+              const data = JSON.parse(r.responseText);
+              if (data.error) {
+                rej(new Error(`API: ${data.error.message}`));
+                return;
+              }
               const txt = data.choices?.[0]?.message?.content;
-              resolve(txt);
+              if (!txt) {
+                rej(new Error('Resposta vazia da IA'));
+                return;
+              }
+              res(txt);
             } catch {
-              reject(new Error('Erro IA'));
+              rej(new Error('Erro ao processar resposta da IA'));
             }
           },
-          onerror: () => reject(new Error('Erro rede'))
+          onerror: () => rej(new Error('Erro rede'))
         });
+        });
+
+        Promise.race([requestPromise, timeoutPromise])
+          .then(result => { clearTimeout(timeoutId); resolve(result); })
+          .catch(err  => { clearTimeout(timeoutId); reject(err); });
       });
     }
 
@@ -330,6 +339,54 @@ Se não, escolha outra.`;
       textarea.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
+    function aguardarBotao(textoBotao, timeoutMs = 5000) {
+      return new Promise((resolve) => {
+        const inicio = Date.now();
+        const intervalo = setInterval(() => {
+          const modal = getModal();
+          if (!modal) { clearInterval(intervalo); resolve(null); return; }
+
+          const btn = [...modal.querySelectorAll('button')]
+            .find(b => b.textContent.trim().includes(textoBotao) && !b.disabled && !b.classList.contains('disabled'));
+
+          if (btn) {
+            clearInterval(intervalo);
+            resolve(btn);
+            return;
+          }
+
+          if (Date.now() - inicio > timeoutMs) {
+            clearInterval(intervalo);
+            resolve(null);
+          }
+        }, 200);
+      });
+    }
+
+    async function confirmarDissertativa() {
+      setStatus('Enviando...', '#cba6f7');
+      const btnAnalisar = await aguardarBotao('Analisar com IA');
+      if (!btnAnalisar) { setStatus('Btn não encontrado', '#f9e2af'); return; }
+      btnAnalisar.click();
+
+      setStatus('Aguardando resultado...', '#cba6f7');
+      // Aguarda o botão principal (fund2-button w-50) ficar habilitado — vira "Próxima Pergunta"
+      const btnProxima = await new Promise((resolve) => {
+        const inicio = Date.now();
+        const intervalo = setInterval(() => {
+          const modal = getModal();
+          if (!modal) { clearInterval(intervalo); resolve(null); return; }
+          const btn = modal.querySelector('button.fund2-button.w-50:not(.disabled):not([disabled])');
+          if (btn) { clearInterval(intervalo); resolve(btn); return; }
+          if (Date.now() - inicio > 10000) { clearInterval(intervalo); resolve(null); }
+        }, 200);
+      });
+
+      if (!btnProxima) { setStatus('OK', '#a6e3a1'); return; }
+      btnProxima.click();
+      setStatus('Próxima!', '#a6e3a1');
+    }
+
     // ─── Run ─────────────────────────────────────────────────────────────────
     async function run() {
       if (quizProcessando) return;
@@ -341,26 +398,23 @@ Se não, escolha outra.`;
       const eraAtivo = autoPageActive;
       if (eraAtivo) stopAutoPage();
 
-      setStatus('Lendo...', '#89b4fa');
-      const q = extrair();
-
-      if (!q) {
-        setStatus('Não achei', '#f38ba8');
-        quizProcessando = false;
-        if (observer) observer.observe(document.body, { childList: true, subtree: true });
-        if (eraAtivo) startAutoPage();
-        return;
-      }
-
-      if (q.tipo === 'dissertativa') {
-        resultEl.textContent = `[Dissertativa]\nPergunta:\n${q.pergunta}\n\nAguardando IA...`;
-      } else {
-        resultEl.textContent =
-          `Pergunta:\n${q.pergunta}\n\n` +
-          q.opcoes.map(o => `${o.letra}. ${o.texto}`).join('\n');
-      }
-
       try {
+        setStatus('Lendo...', '#89b4fa');
+        const q = extrair();
+
+        if (!q) {
+          setStatus('Não achei', '#f38ba8');
+          return;
+        }
+
+        if (q.tipo === 'dissertativa') {
+          resultEl.textContent = `[Dissertativa]\nPergunta:\n${q.pergunta}\n\nAguardando IA...`;
+        } else {
+          resultEl.textContent =
+            `Pergunta:\n${q.pergunta}\n\n` +
+            q.opcoes.map(o => `${o.letra}. ${o.texto}`).join('\n');
+        }
+
         setStatus('IA...', '#f9e2af');
         const r = await perguntarIA(q);
         setStatus('OK', '#a6e3a1');
@@ -368,23 +422,41 @@ Se não, escolha outra.`;
 
         if (q.tipo === 'dissertativa') {
           colarResposta(r.replace(/^[""\u201C\u201D''\u2018\u2019]+|[""\u201C\u201D''\u2018\u2019]+$/g, '').trim());
+          await confirmarDissertativa();
+        } else {
+          const match = r.match(/Resposta:\s*([A-D])/i);
+          if (match) {
+            const letra = match[1].toUpperCase();
+            const modal = getModal();
+            if (modal) {
+              const btnAlternativa = [...modal.querySelectorAll('button.answer-btn')]
+                .find(b => b.querySelector('h5')?.textContent.trim().startsWith(letra));
+              if (btnAlternativa) {
+                btnAlternativa.click();
+                setTimeout(() => {
+                  const btnConfirmar = modal.querySelector('button.fund2-button.w-50:not(.disabled):not([disabled])');
+                  if (btnConfirmar) btnConfirmar.click();
+                }, 1000);
+              }
+            }
+          }
         }
       } catch (e) {
         setStatus('Erro', '#f38ba8');
         resultEl.textContent = e.message;
+      } finally {
+        quizProcessando = false;
+        // Observer reconectado aqui — confirmarDissertativa já terminou antes do finally
+        if (observer) observer.observe(document.body, { childList: true, subtree: true });
+        if (eraAtivo) startAutoPage();
       }
-
-      quizProcessando = false;
-      // Reconecta o observer só depois que o script terminou de mexer no DOM
-      if (observer) observer.observe(document.body, { childList: true, subtree: true });
-      if (eraAtivo) startAutoPage();
     }
 
     // ─── Botões ──────────────────────────────────────────────────────────────
     autoBtn.addEventListener('click', () => {
       if (autoPageActive) {
         stopAutoPage();
-        autoBtn.textContent = '▶ Iniciar Auto-Página';
+        autoBtn.textContent = apiKey ? '▶ Iniciar' : '▶ Iniciar Auto-Página';
         autoBtn.style.background = '#89b4fa';
       } else {
         startAutoPage();
@@ -393,7 +465,6 @@ Se não, escolha outra.`;
       }
     });
 
-    if (btn) btn.onclick = run;
 
     resetBtn.onclick = () => {
       stopAutoPage();
